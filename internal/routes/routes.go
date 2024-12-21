@@ -1,20 +1,17 @@
 package routes
 
 import (
-	"encoding/json"
 	"net/http"
 
-	"github.com/CVWO/sample-go-app/internal/handlers/users"
-	"github.com/go-chi/chi/v5"
+	"github.com/CVWO/sample-go-app/internal/handlers/users" // Update to correct package
 )
 
-func GetRoutes() func(r chi.Router) {
-	return func(r chi.Router) {
-		r.Get("/users", func(w http.ResponseWriter, req *http.Request) {
-			response, _ := users.HandleList(w, req)
+func SetupRouter() *http.ServeMux {
+	mux := http.NewServeMux()
 
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(response)
-		})
-	}
+	// Register the /api/threads endpoint
+	mux.HandleFunc("/api/threads", users.GetThreads)
+	mux.HandleFunc("/api/threads/add", users.CreateThread)  // Registers the /api/threads/add route
+
+	return mux
 }

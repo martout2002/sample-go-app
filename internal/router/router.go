@@ -1,16 +1,17 @@
-package router
+package routes
 
 import (
-	"github.com/CVWO/sample-go-app/internal/routes"
-	"github.com/go-chi/chi/v5"
+	"net/http"
+
+	"github.com/CVWO/sample-go-app/internal/handlers"
 )
 
-func Setup() chi.Router {
-	r := chi.NewRouter()
-	setUpRoutes(r)
-	return r
-}
+// SetupRouter registers all the routes
+func SetupRouter() *http.ServeMux {
+	mux := http.NewServeMux()
 
-func setUpRoutes(r chi.Router) {
-	r.Group(routes.GetRoutes())
+	mux.HandleFunc("/api/threads", handlers.GetThreads)  // GET all threads
+	mux.HandleFunc("/api/threads/add", handlers.CreateThread) // POST to create a thread
+
+	return mux
 }
