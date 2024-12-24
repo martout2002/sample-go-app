@@ -2,45 +2,55 @@ package users
 
 import (
 	"encoding/json"
-	"fmt"
+	"log"
 	"net/http"
 
-	"github.com/CVWO/sample-go-app/internal/api"
-	users "github.com/CVWO/sample-go-app/internal/dataaccess"
 	"github.com/CVWO/sample-go-app/internal/database"
-	"github.com/pkg/errors"
+	"github.com/CVWO/sample-go-app/internal/models"
 )
 
-const (
-	ListUsers = "users.HandleList"
+func HandleList(w http.ResponseWriter, r *http.Request) {
+	log.Println("Handling list users request...")
 
-	SuccessfulListUsersMessage = "Successfully listed users"
-	ErrRetrieveDatabase        = "Failed to retrieve database in %s"
-	ErrRetrieveUsers           = "Failed to retrieve users in %s"
-	ErrEncodeView              = "Failed to retrieve users in %s"
-)
-
-func HandleList(w http.ResponseWriter, r *http.Request) (*api.Response, error) {
-	db, err := database.GetDB()
-
-	if err != nil {
-		return nil, errors.Wrap(err, fmt.Sprintf(ErrRetrieveDatabase, ListUsers))
+	// Check if the database connection is initialized
+	db := database.DB
+	if db == nil {
+		http.Error(w, "Database connection not initialized", http.StatusInternalServerError)
+		log.Println("Database connection not initialized")
+		return
 	}
 
-	users, err := users.List(db)
+	// Fetch users from the database
+	rows, err := db.Query("SELECT id, username FROM users")
 	if err != nil {
-		return nil, errors.Wrap(err, fmt.Sprintf(ErrRetrieveUsers, ListUsers))
+		http.Error(w, "Failed to retrieve users", http.StatusInternalServerError)
+		log.Println("Error retrieving users:", err)
+		return
+	}
+	defer rows.Close()
+
+	// Parse the results
+	var users []models.User
+	for rows.Next() {
+		var user models.User
+		if err := rows.Scan(&user.ID, &user.Username); err != nil {
+			http.Error(w, "Failed to scan user data", http.StatusInternalServerError)
+			log.Println("Error scanning user data:", err)
+			return
+		}
+		users = append(users, user)
 	}
 
-	data, err := json.Marshal(users)
+	// Convert to JSON and send response
+	response, err := json.Marshal(users)
 	if err != nil {
-		return nil, errors.Wrap(err, fmt.Sprintf(ErrEncodeView, ListUsers))
+		http.Error(w, "Failed to encode users", http.StatusInternalServerError)
+		log.Println("Error encoding users:", err)
+		return
 	}
 
-	return &api.Response{
-		Payload: api.Payload{
-			Data: data,
-		},
-		Messages: []string{SuccessfulListUsersMessage},
-	}, nil
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(response)
+	log.Println("Successfully retrieved users")
 }

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/CVWO/sample-go-app/internal/database"
 	"github.com/CVWO/sample-go-app/internal/models"
@@ -75,5 +76,38 @@ func CreateThread(w http.ResponseWriter, r *http.Request) {
 
 	log.Println("Thread created successfully") // Log success
 	w.WriteHeader(http.StatusCreated)
+}
+
+func DeleteThread(w http.ResponseWriter, r *http.Request) {
+    // Ensure the method is DELETE
+    if r.Method != http.MethodDelete {
+        http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+        return
+    }
+
+    // Parse the thread ID from query parameters
+    idStr := r.URL.Query().Get("id")
+    if idStr == "" {
+        http.Error(w, "Thread ID is required", http.StatusBadRequest)
+        return
+    }
+
+    id, err := strconv.Atoi(idStr)
+    if err != nil {
+        http.Error(w, "Invalid thread ID", http.StatusBadRequest)
+        return
+    }
+
+    // Delete the thread from the database
+    db := database.DB
+    _, err = db.Exec("DELETE FROM threads WHERE id = ?", id)
+    if err != nil {
+        http.Error(w, "Failed to delete thread", http.StatusInternalServerError)
+        return
+    }
+
+    // Respond with success
+    w.WriteHeader(http.StatusOK)
+    w.Write([]byte("Thread deleted successfully"))
 }
 

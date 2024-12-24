@@ -3,15 +3,21 @@ package routes
 import (
 	"net/http"
 
-	"github.com/CVWO/sample-go-app/internal/handlers/users" // Update to correct package
+	"github.com/CVWO/sample-go-app/internal/handlers/threads"
+	"github.com/CVWO/sample-go-app/internal/handlers/users"
 )
 
 func SetupRouter() *http.ServeMux {
-	mux := http.NewServeMux()
+    mux := http.NewServeMux()
 
-	// Register the /api/threads endpoint
-	mux.HandleFunc("/api/threads", users.GetThreads)
-	mux.HandleFunc("/api/threads/add", users.CreateThread)  // Registers the /api/threads/add route
+    mux.HandleFunc("/api/threads", threads.GetThreads)  // GET all threads
+    mux.HandleFunc("/api/threads/add", threads.CreateThread) // POST to create a thread
+    mux.HandleFunc("/api/threads/delete", threads.DeleteThread) // DELETE a thread
 
-	return mux
+    // User-related routes
+    mux.HandleFunc("/api/users", users.HandleList)        // GET all users
+    mux.HandleFunc("/api/login", users.HandleLogin)       // POST to login
+    mux.HandleFunc("/api/signup", users.SignupUser)       // POST to signup
+
+    return mux
 }

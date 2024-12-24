@@ -13,19 +13,19 @@ func main() {
 	// Initialize the database
 	log.Println("Initializing database connection")
 	database.InitDB()
-	defer database.DB.Close() // Ensure the database connection is closed when the app shuts down
+	defer database.DB.Close()
 
-	// Set up the router
-	router := routes.SetupRouter()
+	// Setup router
+	r := routes.SetupRouter()
 
-	// Enable CORS
-	corsHandler := handlers.CORS(
-		handlers.AllowedOrigins([]string{"http://localhost:3000"}),
-		handlers.AllowedMethods([]string{"GET", "POST", "OPTIONS"}),
-		handlers.AllowedHeaders([]string{"Content-Type"}),
+	// Add CORS middleware
+	corsOptions := handlers.CORS(
+		handlers.AllowedOrigins([]string{"http://localhost:3000"}), // Adjust origin as needed
+		handlers.AllowedMethods([]string{"GET", "POST", "DELETE", "OPTIONS"}), // Allowed methods
+		handlers.AllowedHeaders([]string{"Content-Type", "Authorization"}),   // Allowed headers
 	)
 
-	// Start the HTTP server
+	// Start the server
 	log.Println("Server running on http://localhost:8000")
-	log.Fatal(http.ListenAndServe(":8000", corsHandler(router)))
+	log.Fatal(http.ListenAndServe(":8000", corsOptions(r)))
 }
