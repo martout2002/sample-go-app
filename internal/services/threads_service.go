@@ -53,3 +53,43 @@ func GetThreads() ([]models.Thread, error) {
 
 	return threads, nil
 }
+
+// ToggleLike toggles the like status for a thread
+func ToggleLike(userID, threadID int) (bool, error) {
+	// Check if the user already liked the thread
+	var exists bool
+	err := database.DB.QueryRow(
+		"SELECT EXISTS(SELECT 1 FROM user_likes WHERE user_id = ? AND thread_id = ?)",
+		userID, threadID,
+	).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+
+	if exists {
+		// Unlike: Remove the like
+		_, err = database.DB.Exec("DELETE FROM user_likes WHERE user_id = ? AND thread_id = ?", userID, threadID)
+		if err != nil {
+			return false, err
+		}
+		return false, nil // False means unliked
+	}
+
+	// Like: Add a new like
+	_, err = database.DB.Exec("INSERT INTO user_likes (user_id, thread_id) VALUES (?, ?)", userID, threadID)
+	if err != nil {
+		return false, err
+	}
+	return true, nil // True means liked
+}
+
+// GetLikesCount retrieves the number of likes for a specific thread
+func GetLikesCount(threadID int) (int, error) {
+	var count int
+	err := database.DB.QueryRow("SELECT COUNT(*) FROM user_likes WHERE thread_id = ?", threadID).Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+

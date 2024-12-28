@@ -55,3 +55,11 @@ func VerifyUser(loginReq models.LoginRequest) (bool, error) {
 	return storedPassword == loginReq.Password, nil
 }
 
+func GetUserIDByUsername(username string) (int, error) {
+	var userID int
+	err := database.DB.QueryRow("SELECT id FROM users WHERE username = ?", username).Scan(&userID)
+	if err != nil {
+		return 0, errors.New("user not found")
+	}
+	return userID, nil
+}

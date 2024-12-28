@@ -3,21 +3,24 @@ package routes
 import (
 	"net/http"
 
-	"github.com/CVWO/sample-go-app/internal/handlers/threads"
-	"github.com/CVWO/sample-go-app/internal/handlers/users"
+	"github.com/CVWO/sample-go-app/internal/controllers"
+	"github.com/CVWO/sample-go-app/internal/middleware"
 )
 
 func SetupRouter() *http.ServeMux {
-    mux := http.NewServeMux()
+	mux := http.NewServeMux()
 
-    mux.HandleFunc("/api/threads", threads.GetThreads)  // GET all threads
-    mux.HandleFunc("/api/threads/add", threads.CreateThread) // POST to create a thread
-    mux.HandleFunc("/api/threads/delete", threads.DeleteThread) // DELETE a thread
+	// Threads
+	mux.Handle("/api/threads", middleware.LoggingMiddleware(http.HandlerFunc(controllers.GetThreads)))
+	mux.Handle("/api/threads/add", middleware.LoggingMiddleware(http.HandlerFunc(controllers.CreateThread)))
+	mux.Handle("/api/threads/delete", middleware.LoggingMiddleware(http.HandlerFunc(controllers.DeleteThread)))
+	mux.Handle("/api/threads/like", middleware.LoggingMiddleware(http.HandlerFunc(controllers.LikeThread)))
+	mux.Handle("/api/threads/likes", middleware.LoggingMiddleware(http.HandlerFunc(controllers.GetLikesCount)))
 
-    // User-related routes
-    mux.HandleFunc("/api/users", users.HandleList)        // GET all users
-    mux.HandleFunc("/api/login", users.HandleLogin)       // POST to login
-    mux.HandleFunc("/api/signup", users.SignupUser)       // POST to signup
+	// Users
+	mux.Handle("/api/users", middleware.LoggingMiddleware(http.HandlerFunc(controllers.HandleListUsers)))
+	mux.Handle("/api/signup", middleware.LoggingMiddleware(http.HandlerFunc(controllers.HandleSignup)))
+	mux.Handle("/api/login", middleware.LoggingMiddleware(http.HandlerFunc(controllers.HandleLogin)))
 
-    return mux
+	return mux
 }

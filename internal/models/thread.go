@@ -10,4 +10,5 @@ type Thread struct {
 	Details       string  `json:"details"`
 	Rating        float64 `json:"rating"`
 	Comments      string  `json:"comments"`
+	Likes 	   	  int     `json:"likes"`
 }
