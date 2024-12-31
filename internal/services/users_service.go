@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"errors"
 
-	"github.com/CVWO/sample-go-app/internal/database"
-	"github.com/CVWO/sample-go-app/internal/models"
+	"searchFoodBackend/internal/database"
+	"searchFoodBackend/internal/models"
 )
 
 func GetAllUsers() ([]models.User, error) {
@@ -62,4 +62,13 @@ func GetUserIDByUsername(username string) (int, error) {
 		return 0, errors.New("user not found")
 	}
 	return userID, nil
+}
+
+func GetUsernameByID(userID int) (string, error) {
+	var username string
+	err := database.DB.QueryRow("SELECT username FROM users WHERE id = ?", userID).Scan(&username)
+	if err != nil {
+		return "", errors.New("user not found")
+	}
+	return username, nil
 }

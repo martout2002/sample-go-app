@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/CVWO/sample-go-app/internal/models"
-	"github.com/CVWO/sample-go-app/internal/services"
+	"searchFoodBackend/internal/models"
+	"searchFoodBackend/internal/services"
 )
 
 // CreateThread handles creating a new thread
@@ -63,30 +63,22 @@ func GetThreads(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(threads)
 }
 
-// LikeThread toggles the like status for a specific thread by a user
 func LikeThread(w http.ResponseWriter, r *http.Request) {
-	log.Println("LikeThread endpoint hit") // Log the endpoint hit
-
-	// Get thread ID from query parameters
 	threadIDStr := r.URL.Query().Get("id")
 	if threadIDStr == "" {
 		http.Error(w, "Thread ID is required", http.StatusBadRequest)
-		log.Println("Missing thread ID in query parameters")
 		return
 	}
 
-	// Convert thread ID to an integer
 	threadID, err := strconv.Atoi(threadIDStr)
 	if err != nil {
 		http.Error(w, "Invalid thread ID", http.StatusBadRequest)
-		log.Printf("Invalid thread ID: %s", threadIDStr)
 		return
 	}
 
-	// Get the username from the header (simulating authentication)
-	username := r.Header.Get("X-Username")
+	username := r.Header.Get("X-Username") // Extract username from header
 	if username == "" {
-		http.Error(w, "Unauthorized: username missing", http.StatusUnauthorized)
+		http.Error(w, "Missing username in request header", http.StatusUnauthorized)
 		log.Println("Missing username in request header")
 		return
 	}
@@ -99,7 +91,6 @@ func LikeThread(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Toggle the like status
 	liked, err := services.ToggleLike(userID, threadID)
 	if err != nil {
 		http.Error(w, "Failed to toggle like status", http.StatusInternalServerError)
@@ -107,32 +98,27 @@ func LikeThread(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Fetch the updated like count
-	likeCount, err := services.GetLikesCount(threadID)
-	if err != nil {
-		http.Error(w, "Failed to fetch like count", http.StatusInternalServerError)
-		log.Printf("Error fetching like count for thread ID %d: %v", threadID, err)
-		return
-	}
-
-	// Respond with the updated like status and count
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"liked": liked,
-		"likes": likeCount,
+		"likes": func() int {
+			likes, err := services.GetLikesCount(threadID)
+			if err != nil {
+				log.Printf("Error fetching like count for thread ID %d: %v", threadID, err)
+				return 0
+			}
+			return likes
+		}(),
 	})
 }
 
-
-// GetLikesCount handles fetching the like count for a specific thread
-func GetLikesCount(w http.ResponseWriter, r *http.Request) {
-	log.Println("GetLikesCount endpoint hit") // Log when the endpoint is accessed
-
+// GetThreadLikesCount handles fetching the total number of likes for a specific thread
+func GetThreadLikesCount(w http.ResponseWriter, r *http.Request) {
 	// Parse thread ID from query parameters
 	threadIDStr := r.URL.Query().Get("id")
 	if threadIDStr == "" {
 		http.Error(w, "Thread ID is required", http.StatusBadRequest)
-		log.Println("Thread ID missing from query parameters")
+		log.Println("Missing thread ID in query parameters")
 		return
 	}
 

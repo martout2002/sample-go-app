@@ -3,8 +3,8 @@ package routes
 import (
 	"net/http"
 
-	"github.com/CVWO/sample-go-app/internal/controllers"
-	"github.com/CVWO/sample-go-app/internal/middleware"
+	"searchFoodBackend/internal/controllers"
+	"searchFoodBackend/internal/middleware"
 )
 
 func SetupRouter() *http.ServeMux {
@@ -15,7 +15,7 @@ func SetupRouter() *http.ServeMux {
 	mux.Handle("/api/threads/add", middleware.LoggingMiddleware(http.HandlerFunc(controllers.CreateThread)))
 	mux.Handle("/api/threads/delete", middleware.LoggingMiddleware(http.HandlerFunc(controllers.DeleteThread)))
 	mux.Handle("/api/threads/like", middleware.LoggingMiddleware(http.HandlerFunc(controllers.LikeThread)))
-	mux.Handle("/api/threads/likes", middleware.LoggingMiddleware(http.HandlerFunc(controllers.GetLikesCount)))
+	mux.Handle("/api/threads/likes", middleware.LoggingMiddleware(http.HandlerFunc(controllers.GetThreadLikesCount)))
 
 	// Users
 	mux.Handle("/api/users", middleware.LoggingMiddleware(http.HandlerFunc(controllers.HandleListUsers)))

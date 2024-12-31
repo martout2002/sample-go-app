@@ -4,9 +4,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/CVWO/sample-go-app/internal/database"
-	"github.com/CVWO/sample-go-app/internal/middleware"
-	"github.com/CVWO/sample-go-app/internal/routes"
+	"searchFoodBackend/internal/database"
+	"searchFoodBackend/internal/middleware"
+	"searchFoodBackend/internal/routes"
 )
 
 func main() {

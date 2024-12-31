@@ -5,8 +5,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/CVWO/sample-go-app/internal/models"
-	"github.com/CVWO/sample-go-app/internal/services"
+	"searchFoodBackend/internal/models"
+	"searchFoodBackend/internal/services"
 )
 
 func HandleListUsers(w http.ResponseWriter, r *http.Request) {
